@@ -35,8 +35,8 @@ def invCount(board):
 def play(board, moveCtr): 
     while(True):
         while(True):
-            move = input("Slide empty block(^,v, <, >): ")
-            if(move not in ["^", "v", "<", ">"]): 
+            move = input("Slide empty block(w,a,s,d): ")
+            if(move not in ["w","a","s","d"]): 
                 print("invalid move")
                 continue
             break
@@ -50,25 +50,25 @@ def play(board, moveCtr):
 def updateBoard(board, move):
     for block in range(0,9):
         if(board[block] == 9):
-            if(move == "^"): #up
+            if(move == "w"): #up
                 if(block in [0,1,2]): #invalid pos for move
                    print("invalid move")
                    return 0 #invalid
                 board[block -3], board[block] = board[block], board[block -3] #block swap
                 break
-            if(move == "v"): #down
+            if(move == "s"): #down
                 if(block in [6,7,8]): 
                    print("invalid move")
                    return 0
                 board[block], board[block +3] = board[block +3], board[block]
                 break
-            if(move == "<"): #left
+            if(move == "a"): #left
                 if(block in [0,3,6]): 
                    print("invalid move")
                    return 0
                 board[block -1], board[block] = board[block], board[block -1]
                 break
-            if(move == ">"): #right
+            if(move == "d"): #right
                 if(block in [2,5,8]): 
                    print("invalid move")
                    return 0
