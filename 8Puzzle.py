@@ -3,9 +3,24 @@ import random
 def start():
     board = [None] * 9 #empty array
     moveCtr = 0
-    randomize(board)
+    #randomize(board)
+    board = load(board)
     displayBoard(board)
     play(board, moveCtr)
+
+def load(board): #load from specified file
+    file = open("input.txt","r")
+    toSplit = file.read().splitlines() #split newlines
+    board = toSplit[0].split(";") + toSplit[1].split(";") + toSplit[2].split(";") #split lists using ";" then combine lists
+    for i in range(0,9):
+        board[i] = int(board[i]) #turn all values to int
+    file.close()
+    if(isValid(board) == 0): 
+        displayBoard(board)
+        print("Unsolvable Board")
+        quit()
+    return board
+
 
 def randomize(board): #board generation
     while(True):
@@ -17,7 +32,7 @@ def randomize(board): #board generation
                 possible.remove(newInt) #ensure no duplicate
                 break
             board[block] = newInt
-        if(isValid(board) == 0): continue
+        if(isValid(board) == 0): continue #when unsolvable, regenerate
         break
 
 def isValid(board):
@@ -49,7 +64,7 @@ def play(board, moveCtr):
 
 def updateBoard(board, move):
     for block in range(0,9):
-        if(board[block] == 9):
+        if(board[block] == 9 or board[block] == 0):
             if(move == "w"): #up
                 if(block in [0,1,2]): #invalid pos for move
                    print("invalid move")
@@ -79,12 +94,12 @@ def updateBoard(board, move):
 def displayBoard(board):
     for block in range(0,9):
         if((block +3) %3 == 0): print("\n",end = "|") #every start
-        if(board[block] == 9): print(" ", end = "|")
+        if(board[block] == 9 or board[block] == 0): print(" ", end = "|")
         else: print(board[block], end = "|")
     print() #clean
 
 def isWon(board, moveCtr):
-    if(board == [1,2,3,4,5,6,7,8,9]): #board in order
+    if(board == [1,2,3,4,5,6,7,8,9] or board == [1,2,3,4,5,6,7,8,0]): #board in order
         print("You Won!", "\nTurns taken:", moveCtr); quit()
 
 start()
