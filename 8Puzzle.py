@@ -24,10 +24,10 @@ def load(board): #load from specified file
 
 def randomize(board): #board generation
     while(True):
-        possible = [1,2,3,4,5,6,7,8,9]
+        possible = [1,2,3,4,5,6,7,8,0]
         for block in range(0,9):
             while(True):
-                newInt = random.randint(1,9)
+                newInt = random.randint(0,8)
                 if(newInt not in possible): continue
                 possible.remove(newInt) #ensure no duplicate
                 break
@@ -43,7 +43,7 @@ def invCount(board):
     invCtr = 0
     for block in range(0,9): #this block compared to all blocks
         for nextBlocks in range(block +1, 9):
-            if(board[block] != 9 and board[nextBlocks] != 9 and board[block] > board[nextBlocks]):
+            if(board[block] != 0 and board[nextBlocks] != 0 and board[block] > board[nextBlocks]):
                 invCtr +=1
     return invCtr
 
@@ -64,7 +64,7 @@ def play(board, moveCtr):
 
 def updateBoard(board, move):
     for block in range(0,9):
-        if(board[block] == 9 or board[block] == 0):
+        if(board[block] == 0):
             if(move == "w"): #up
                 if(block in [0,1,2]): #invalid pos for move
                    print("invalid move")
@@ -94,12 +94,12 @@ def updateBoard(board, move):
 def displayBoard(board):
     for block in range(0,9):
         if((block +3) %3 == 0): print("\n",end = "|") #every start
-        if(board[block] == 9 or board[block] == 0): print(" ", end = "|")
+        if(board[block] == 0): print(" ", end = "|")
         else: print(board[block], end = "|")
     print() #clean
 
 def isWon(board, moveCtr):
-    if(board == [1,2,3,4,5,6,7,8,9] or board == [1,2,3,4,5,6,7,8,0]): #board in order
+    if(board == [1,2,3,4,5,6,7,8,0]): #board in order
         print("You Won!", "\nTurns taken:", moveCtr); quit()
 
 start()

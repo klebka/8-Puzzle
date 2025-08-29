@@ -2,12 +2,39 @@ import random
 
 def start():
     board = [None] * 9 #empty array
-    moveCtr = 0
-    #randomizedBoard = randomize(board)
-    loadedBoard = load(board)
-    displayBoard(loadedBoard)
-    solve_bfs(loadedBoard)
-    solve_dfs(loadedBoard)
+    menu(board)
+
+def menu(board):
+    while(True):
+        print("[1] Generate Random Board")
+        print("[2] Load from Input.txt")
+        choice = input("Select mode: ")
+        if(choice == "1"):
+            board = randomize(board)
+            solverMenu(board)
+        elif(choice == "2"):
+            board = load(board)
+            solverMenu(board)
+        elif(choice == "3"):
+            quit()
+        else: print("invalid selection")
+
+def solverMenu(board):
+    displayBoard(board)
+    while(True):
+        print("[1] Solve with BFS")
+        print("[2] Solve with DFS")
+        choice = input("Select mode: ")
+        if(choice == "1"):
+            solve_bfs(board)
+            return
+        elif(choice == "2"):
+            solve_dfs(board)
+            return
+        elif(choice == "3"):
+            return
+        else: print("invalid selection")
+
 
 def load(board): #load from specified file
     file = open("input.txt","r")
@@ -63,7 +90,6 @@ def updateBoard(board, move):
             if(move == "d"): #right
                 board[block], board[block +1] = board[block +1], board[block]
                 break
-    return board
 
 def displayBoard(board):
     for block in range(0,9):
@@ -78,38 +104,49 @@ def isWon(board, moveCtr, actionTaken, pathCost):
         print("Solved", "\nExplored states:", moveCtr); print("Path Cost: ", pathCost); print("Moves Done: ", end = "")
         for action in actionTaken: print(action, end=" ")
         print()
-        quit()
+        return 1
 
 def solve_bfs(board):
     frontier = [board]
     explored = []
-    actionTaken = []
+    path = []
     while(len(frontier) != 0):
         currentState = frontier.pop(0)
+        if(len(currentState) == 10):
+            path = currentState.pop()
         explored.append(currentState)
-        isWon(currentState,len(explored), actionTakenHelper(actionTaken), len(actionTaken)) #check if solved
+        if(isWon(currentState,len(explored), actionTakenHelper(path), len(path)) == 1): return #check if solved
         actions = possibleActions(currentState) #check for possible actions
         for action in actions:
-            holderState = currentState.copy() #always copy original current state
-            tempState = updateBoard(holderState, action) #only update the copy of original
+            tempState = currentState.copy() #always copy original current state
+            updateBoard(tempState, action) #only update the copy of original
+            if(tempState in explored):
+                path.append(action)
             if(tempState not in explored and tempState not in frontier and tempState != 0): #check if not explored or to be explored
+                tempState.append(path)
                 frontier.append(tempState)
     print("explored all")
     
 def solve_dfs(board):
     frontier = [board]
     explored = []
-    actionTaken = []
+    path = []
     while(len(frontier) != 0):
-        currentState = frontier.pop(-1)
+        currentState = frontier.pop()
+        if(len(currentState) == 10):
+            path = currentState.pop()
         explored.append(currentState)
-        isWon(currentState,len(explored), actionTakenHelper(actionTaken), len(actionTaken)) #check if solved
+        if(isWon(currentState,len(explored), actionTakenHelper(path), len(path)) == 1): return #check if solved
         actions = possibleActions(currentState) #check for possible actions
         for action in actions:
-            holderState = currentState.copy() #always copy original current state
-            tempState = updateBoard(holderState, action) #only update the copy of original
-            if(tempState not in explored and tempState != 0): #check if not explored or to be explored
+            tempState = currentState.copy() #always copy original current state
+            updateBoard(tempState, action) #only update the copy of original
+            if(tempState in explored):
+                path.append(action)
+            if(tempState not in explored and tempState != 0): #check if not explored
+                tempState.append(path)
                 frontier.append(tempState)
+
     print("explored all")
     
 def possibleActions(board):
