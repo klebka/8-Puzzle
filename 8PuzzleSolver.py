@@ -1,5 +1,11 @@
 import random
 
+#test case 1: bfs (91,6,L L D D R R) dfs (7,6,L L D D R R)
+#test case 2: bfs (45,5,D L U R D) dfs (59,57,L L D R R U L L D R R U L L D R R U L L D R R U L L D R U L D R R U L L D R R U L L D R R U L L D R R U L L D R R)
+#test case 3: bfs (3,1,D) dfs (30,29,L L D R R U L L D R R U L L D R R U L L D R R U L L D R R)
+#test case 4: bfs (102162,21,D R U L D L U R R D L L D R R U L U R D D)
+#test case 5: 400000+++ (terminated)
+
 def start():
     board = [None] * 9 #empty array
     menu(board)
@@ -39,6 +45,7 @@ def solverMenu(board):
 def load(board): #load from specified file
     file = open("input.txt","r")
     toSplit = file.read().splitlines() #split newlines
+    if(len(toSplit) == 0): print("Empty Board"); quit()
     board = toSplit[0].split(";") + toSplit[1].split(";") + toSplit[2].split(";") #split lists using ";" then combine lists
     for i in range(0,9):
         board[i] = int(board[i]) #turn all values to int
@@ -111,19 +118,20 @@ def solve_bfs(board):
     explored = []
     path = []
     while(len(frontier) != 0):
-        currentState = frontier.pop(0)
-        if(len(currentState) == 10):
-            path = currentState.pop()
+        print("solving: ", len(explored))
+        currentState = frontier.pop(0) #FiFo
+        if(len(currentState) == 10): #only when has track
+            path = currentState.pop() #remove the track of actions
         explored.append(currentState)
         if(isWon(currentState,len(explored), actionTakenHelper(path), len(path)) == 1): return #check if solved
         actions = possibleActions(currentState) #check for possible actions
         for action in actions:
-            tempState = currentState.copy() #always copy original current state
+            tempPath = path.copy() #copy path to prevent modification
+            tempState = currentState.copy() #copy original current state to prevent modification
             updateBoard(tempState, action) #only update the copy of original
-            if(tempState in explored):
-                path.append(action)
+            tempPath.append(action) #keep track of actions
             if(tempState not in explored and tempState not in frontier and tempState != 0): #check if not explored or to be explored
-                tempState.append(path)
+                tempState.append(tempPath) #add track
                 frontier.append(tempState)
     print("explored all")
     
@@ -132,19 +140,19 @@ def solve_dfs(board):
     explored = []
     path = []
     while(len(frontier) != 0):
-        currentState = frontier.pop()
+        currentState = frontier.pop() #FiLo
         if(len(currentState) == 10):
             path = currentState.pop()
         explored.append(currentState)
-        if(isWon(currentState,len(explored), actionTakenHelper(path), len(path)) == 1): return #check if solved
-        actions = possibleActions(currentState) #check for possible actions
+        if(isWon(currentState,len(explored), actionTakenHelper(path), len(path)) == 1): return
+        actions = possibleActions(currentState)
         for action in actions:
-            tempState = currentState.copy() #always copy original current state
-            updateBoard(tempState, action) #only update the copy of original
-            if(tempState in explored):
-                path.append(action)
-            if(tempState not in explored and tempState != 0): #check if not explored
-                tempState.append(path)
+            tempPath = path.copy()
+            tempState = currentState.copy()
+            updateBoard(tempState, action)
+            tempPath.append(action)
+            if(tempState not in explored and tempState != 0): #check only if not explored
+                tempState.append(tempPath)
                 frontier.append(tempState)
 
     print("explored all")
