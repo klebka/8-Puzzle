@@ -1,4 +1,10 @@
-import random, time
+import random
+
+#Working:
+#test case 1: H1 H2
+#test case 1: H1 H2
+#test case 1: H1 H2
+#test case 1: H2
 
 def start():
     board = [None] * 9 #empty array
@@ -36,14 +42,16 @@ def solverMenu(board):
             print("Solve based on:")
             print("[1] Misplaced tiles")
             print("[2] Manhattan Distance")
-            print("[3] Non-adjacent tiles")
+            #print("[3] Non-adjacent tiles")
             choice = input("Select mode: ")
             if(choice == "1"):
                 heuristic = 1
             elif(choice == "2"):
                 heuristic = 2
             elif(choice == "3"):
-                heuristic = 3
+                #heuristic = 3
+                print("not implemented yet")
+                break
             elif(choice == "0"):
                 continue
             solve_astar(board, heuristic)
@@ -169,20 +177,20 @@ def solve_dfs(board):
     print("explored all")
     
 def solve_astar(board, heuristic):
-    frontier = [board] #[b,o,a,r,d, [path], f]
+    frontier = [board] #[b,o,a,r,d, [path], f(n)]
     explored = []
     path = []
     while(len(frontier) != 0):
         print("solving: ", len(explored))
         counter = 0
         bestState = frontier.pop()
-        if(len(bestState) > 9):
+        if(len(bestState) > 9): #only if [path] and f(n) is present
             for state in frontier:
-                if(state[10] < bestState[10]): 
+                if(state[10] < bestState[10]): #finding best f(n)
                     bestState = state.copy()
                     frontier.pop(counter)
                     break
-                counter += 1
+                counter += 1 #track index
             path = bestState.pop(9) #remove the track of actions
         explored.append(bestState)
         if(isWon(bestState,len(explored), actionTakenHelper(path), len(path)) == 1): return #check if solved
@@ -192,19 +200,21 @@ def solve_astar(board, heuristic):
             tempState = bestState.copy()
             updateBoard(tempState, action)
             tempPath.append(action)
-            if((tempState not in explored and tempState not in frontier) or (tempState in explored and duplicateCheck(explored, tempState) == 1)): #check if not explored or to be explored
-                if(len(tempState) == 10): tempState.pop()
+            if((tempState not in explored and tempState not in frontier) or (tempState in explored and duplicateCheck(explored, tempState) == 1)): #check if not explored or to be explored OR if in explored but has lower f(n)
+                if(len(tempState) == 10): tempState.pop() #remove f(n) to recalculate
                 tempState.append(tempPath)
-                if(heuristic == 1):
-                    tempState.append(countMisplaced(tempState)+len(tempPath))
+                if(heuristic == 1): #for misplaced tiles
+                    tempState.append(countMisplaced(tempState) + len(tempPath)) #f(n) = h(n) + g(n)
+                if(heuristic == 2): #for manhattan
+                    tempState.append(manhattan(tempState) + len(tempPath))
                 frontier.append(tempState)
     print("explored all")
 
 def duplicateCheck(explored, stateToCompare):
     counter = 0
     for state in explored:
-        if(state[0:9] == stateToCompare[0:9] and stateToCompare[9] <= state[9]):
-            explored.pop(counter)
+        if(state[0:9] == stateToCompare[0:9] and stateToCompare[-1] <= state[-1]): #check if same state then check if lower f(n)
+            explored.pop(counter) #delete duplicate
             return 1
         counter += 1
     return 0
@@ -212,10 +222,35 @@ def duplicateCheck(explored, stateToCompare):
 def countMisplaced(board):
     misplaced = 0
     for block in range(0,8):
-        if(board[block] != block+1 and board[block] != 0): misplaced += 1
-    if(board[8] != 0): misplaced += 1 
+        if(board[block] != block+1 and board[block] != 0): misplaced += 1 #check if block at 0th Position is 1 (Nth Position == N+)
+    if(board[8] != 0): misplaced += 1 #for 9th block
     return misplaced
-    
+
+def manhattan(board):
+    distance = 0
+    goalState = [1,2,3,4,5,6,7,8,0]
+    for block in range(0,8):
+        if(board[block] != block+1 and board[block] != 0): #if misplaced
+            x,y = translateIndex(goalState.index(board[block])) #translate index to coordinate
+            a,b = translateIndex(block)
+            distance += (abs(x-a) + abs(y-b)) #|x1-x2| + |y1-y2|
+    if(board[8] != 0): #for 9th block
+        x,y = translateIndex(goalState.index(board[block]))
+        a,b = translateIndex(block)
+        distance += (abs(x-a) + abs(y-b))
+    return distance
+
+def translateIndex(index):
+    if(index == 0): return 0,0 #0,0 0,1 0,2
+    if(index == 1): return 0,1 #1,0 1,1 1,2
+    if(index == 2): return 0,2 #2,0 2,1 2,2
+    if(index == 3): return 1,0
+    if(index == 4): return 1,1
+    if(index == 5): return 1,2
+    if(index == 6): return 2,0
+    if(index == 7): return 2,1
+    if(index == 8): return 2,2
+
 def possibleActions(board):
     for block in range(0,9):
         if(board[block] == 0):
