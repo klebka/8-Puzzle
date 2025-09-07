@@ -2,8 +2,8 @@ import random
 
 #Working:
 #test case 1: H1 H2
-#test case 1: H1 H2
-#test case 1: H1 H2
+#test case 1: H1 H2 H3
+#test case 1: H1 H2 H3
 #test case 1: H2
 
 def start():
@@ -26,36 +26,38 @@ def menu(board):
         else: print("invalid selection")
 
 def solverMenu(board):
+    originalBoard = board.copy()
     displayBoard(board)
     while(True):
+        print("[0] Return to Board Options")
         print("[1] Solve with BFS")
         print("[2] Solve with DFS")
         print("[3] Solve with A*")
         choice = input("Select mode: ")
         if(choice == "1"):
             solve_bfs(board)
-            return
+            board = originalBoard.copy()
         elif(choice == "2"):
             solve_dfs(board)
-            return
+            board = originalBoard.copy()
         elif(choice == "3"):
             print("Solve based on:")
             print("[1] Misplaced tiles")
             print("[2] Manhattan Distance")
-            #print("[3] Non-adjacent tiles")
+            print("[3] Non-adjacent tiles")
             choice = input("Select mode: ")
             if(choice == "1"):
                 heuristic = 1
             elif(choice == "2"):
                 heuristic = 2
             elif(choice == "3"):
-                #heuristic = 3
-                print("not implemented yet")
-                break
+                heuristic = 3
+                #print("not implemented yet")
+                #break
             elif(choice == "0"):
                 continue
             solve_astar(board, heuristic)
-            return
+            board = originalBoard.copy()
         elif(choice == "0"):
             return
         else: print("invalid selection")
@@ -137,7 +139,9 @@ def solve_bfs(board):
     explored = []
     path = []
     while(len(frontier) != 0):
-        print("solving: ", len(explored))
+        if(len(explored) > timeout): 
+            print("timeout")
+            break
         currentState = frontier.pop(0) #FiFo
         if(len(currentState) == 10): #only when has track
             path = currentState.pop() #remove the track of actions
@@ -159,6 +163,9 @@ def solve_dfs(board):
     explored = []
     path = []
     while(len(frontier) != 0):
+        if(len(explored) > timeout): 
+            print("timeout")
+            break
         currentState = frontier.pop() #FiLo
         if(len(currentState) == 10):
             path = currentState.pop()
@@ -181,7 +188,9 @@ def solve_astar(board, heuristic):
     explored = []
     path = []
     while(len(frontier) != 0):
-        print("solving: ", len(explored))
+        if(len(explored) > timeout): 
+            print("timeout")
+            break
         counter = 0
         bestState = frontier.pop()
         if(len(bestState) > 9): #only if [path] and f(n) is present
@@ -207,6 +216,8 @@ def solve_astar(board, heuristic):
                     tempState.append(countMisplaced(tempState) + len(tempPath)) #f(n) = h(n) + g(n)
                 if(heuristic == 2): #for manhattan
                     tempState.append(manhattan(tempState) + len(tempPath))
+                if(heuristic == 3): #for non-adjacent tiles
+                    tempState.append(nonAdjacent(tempState) + len(tempPath))
                 frontier.append(tempState)
     print("explored all")
 
@@ -239,6 +250,16 @@ def manhattan(board):
         a,b = translateIndex(block)
         distance += (abs(x-a) + abs(y-b))
     return distance
+
+def nonAdjacent(board):
+    nonAdjacent = 12
+    goalState = [(1,2),(2,3),(4,5),(5,6),(7,8),(8,0),(1,4),(2,5),(3,6),(4,7),(5,8),(6,0)]
+    for block in range(0,8):
+        if(block not in [2,5]):
+            if((board[block],board[block + 1]) in goalState): nonAdjacent -= 1
+        if(block not in [6,7]):    
+            if((board[block],board[block + 3]) in goalState): nonAdjacent -= 1
+    return nonAdjacent
 
 def translateIndex(index):
     if(index == 0): return 0,0 #0,0 0,1 0,2
@@ -273,4 +294,5 @@ def actionTakenHelper(actionTaken):
         elif(action == "a"): actualAction.append("L")
     return actualAction
 
+timeout = 1000
 start()
